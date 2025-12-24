@@ -1,4 +1,4 @@
-
+setfpscap(50)
 -- =====================================================
 -- 🔐 ASTRO KEY + WHITELIST GATE
 -- =====================================================
@@ -308,55 +308,39 @@ local function createRainbowBall(cf)
 	end)
 end
 
-local function teleportUpActivateFlagAndReturn()
-	local char = lp.Character
-	if not char then return end
-
-	local hrp = char:FindFirstChild("HumanoidRootPart")
-	if not hrp then return end
-
-	local originalCF = hrp.CFrame
-
-	-- Teleport up
-	hrp.CFrame = originalCF + Vector3.new(0, 0, 999999)
-	task.wait(0.15)
-
-	-- Activate fflag while up
-	setfflag("NextGenReplicatorEnabledWrite4", "true")
-	task.wait(0.05)
-
-	-- Teleport back down
-	hrp.CFrame = originalCF
-end
-
 btn.MouseButton1Click:Connect(function()
 	enabled = not enabled
-
 	if enabled then
 		btn.Text = "Desync ON"
-					setfpscap(40)
-
-		-- 🔥 TELEPORT UP → FLAG → BACK DOWN
-		teleportUpActivateFlagAndReturn()
-
+		setfflag("NextGenReplicatorEnabledWrite4","true")
 		local char = lp.Character
 		if char and char:FindFirstChild("HumanoidRootPart") then
 			createRainbowBall(char.HumanoidRootPart.CFrame)
 		end
-
 		if char and char:FindFirstChild("Animate") then
 			char.Animate.Disabled = true
 		end
 	else
 		btn.Text = "Desync OFF"
-		setfflag("NextGenReplicatorEnabledWrite4", "false")
+		setfflag("NextGenReplicatorEnabledWrite4","false")
 		removeRainbowBall()
-					setfpscap(999)
-
 		if lp.Character and lp.Character:FindFirstChild("Animate") then
 			lp.Character.Animate.Disabled = false
 		end
 	end
+end)
+
+lp.CharacterAdded:Connect(function(char)
+	task.delay(0.1,function()
+		if not enabled then return end
+		enabled = false
+		btn.Text = "Desync OFF"
+		setfflag("NextGenReplicatorEnabledWrite4","false")
+		removeRainbowBall()
+		if char and char:FindFirstChild("Animate") then
+			char.Animate.Disabled = false
+		end
+	end)
 end)
 
 end)
