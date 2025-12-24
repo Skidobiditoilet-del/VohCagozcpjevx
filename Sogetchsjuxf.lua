@@ -113,6 +113,7 @@ local WHITELIST = {
 	    3017100598,
 	9165061136,
 	4325317802,
+	4760159686,
 }
 
 local function isWhitelisted(id)
