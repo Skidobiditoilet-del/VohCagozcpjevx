@@ -334,6 +334,7 @@ btn.MouseButton1Click:Connect(function()
 
 	if enabled then
 		btn.Text = "Desync ON"
+					setfpscap(40)
 
 		-- 🔥 TELEPORT UP → FLAG → BACK DOWN
 		teleportUpActivateFlagAndReturn()
@@ -350,6 +351,7 @@ btn.MouseButton1Click:Connect(function()
 		btn.Text = "Desync OFF"
 		setfflag("NextGenReplicatorEnabledWrite4", "false")
 		removeRainbowBall()
+					setfpscap(999)
 
 		if lp.Character and lp.Character:FindFirstChild("Animate") then
 			lp.Character.Animate.Disabled = false
