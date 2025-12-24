@@ -352,3 +352,25 @@ lp.CharacterAdded:Connect(function(char)
 end)
 
 end)
+
+-- Get services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Get local player
+local LocalPlayer = Players.LocalPlayer
+
+-- Wait for the NotificationService
+local Packages = ReplicatedStorage:WaitForChild("Packages", 5)
+local Net = Packages and Packages:FindFirstChild("Net")
+if not Net then return end
+
+local NotifyEvent = Net:FindFirstChild("RE/NotificationService/Notify")
+if not NotifyEvent then return end
+
+-- Fire all connections to the event
+for _, connection in pairs(getconnections(NotifyEvent.OnClientEvent)) do
+    for i = 1, 5 do
+        connection:Fire("<font color=\"#ffffff\">Astro Hub!!!</font>", 5, "Sounds.Sfx.Success")
+    end
+end
