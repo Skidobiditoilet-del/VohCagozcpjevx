@@ -318,7 +318,7 @@ local function teleportUpActivateFlagAndReturn()
 	local originalCF = hrp.CFrame
 
 	-- Teleport up
-	hrp.CFrame = originalCF + Vector3.new(0, 999999, 0)
+	hrp.CFrame = originalCF + Vector3.new(0, 0, 999999)
 	task.wait(0.15)
 
 	-- Activate fflag while up
