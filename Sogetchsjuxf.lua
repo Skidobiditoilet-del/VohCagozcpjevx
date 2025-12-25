@@ -1,34 +1,11 @@
--- LocalScript (place in StarterPlayerScripts)
-
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-
--- Create ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CenterTextGui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
-
--- Create TextLabel
-local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(0, 200, 0, 50) -- width: 200, height: 50
-textLabel.Position = UDim2.new(0.5, -100, 0.5, -25) -- center of the screen
-textLabel.BackgroundTransparency = 1 -- no background
-textLabel.Text = "Astro Hub"
-textLabel.TextColor3 = Color3.fromRGB(0, 255, 255) -- cyan text
-textLabel.TextTransparency = 0.5 -- semi-transparent text
-textLabel.TextScaled = true
-textLabel.Font = Enum.Font.Gotham -- set font
-textLabel.Parent = screenGui
-
 -- =====================================================
--- 🔐 ASTRO HUB + RTX DESYNC V2 (FULL FFLAGS, MODERN GUI)
+-- 🔐 ASTRO HUB + RTX DESYNC V2 + RAINBOW BALL TRACKER
 -- =====================================================
 local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
-local lp = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
+local player = Players.LocalPlayer
 local fenv = getfenv()
 
 -- =============================
@@ -52,7 +29,7 @@ local function dec(s)
 end
 
 -- =============================
--- 🔑 ASTRO KEYS
+-- 🔑 ALL ORIGINAL ASTRO KEYS
 -- =============================
 local OBF_KEYS = {
 	enc("ASTRO-H)-&93!?-$/@,9baPHAGAB!x"),
@@ -117,56 +94,32 @@ local function validKey(input)
 end
 
 -- =============================
--- 🔒 WHITELIST
+-- 🔒 FULL WHITELIST
 -- =============================
 local WHITELIST = {
-
-9096936639,
-	9413956331,
-	5147217242,
-	9289573988,
-	2267722836,
-        9095930366,
-        5185180577,
-        3798648308,
-        3834272985,
-        4074877885,
-        7940597914,
-        9573877434,
-        3814919171,
-        8015008893,
-	    9076825781,
-	    507378976,
-	    3685192177,
-	    8423106237,
-	    3056073584,
-	    976368016,
-	    3221780784,
-	    3017100598,
-	9165061136,
-	4325317802,
-	4760159686,
-	2587258663,
-	2514102353,
-	9178117573,
-	1834293435,
-	5441334000,
-	8382558060,
-	5142927582,
+	9096936639, 9413956331, 5147217242, 9289573988, 2267722836,
+	9095930366, 5185180577, 3798648308, 3834272985, 4074877885,
+	7940597914, 9573877434, 3814919171, 8015008893, 9076825781,
+	507378976, 3685192177, 8423106237, 3056073584, 976368016,
+	3221780784, 3017100598, 9165061136, 4325317802, 4760159686,
+	2587258663, 2514102353, 9178117573, 1834293435, 5441334000,
+	8382558060, 5142927582,
 }
 
 local function isWhitelisted(id)
-	for _, v in (WHITELIST) do
+	for _, v in ipairs(WHITELIST) do
 		if v == id then return true end
 	end
 	return false
 end
 
 -- =============================
--- 🔑 ASTRO KEY GUI
+-- KEY ENTRY GUI
 -- =============================
-local gateGui = Instance.new("ScreenGui", CoreGui)
+local gateGui = Instance.new("ScreenGui")
+gateGui.Name = "AstroKeyGui"
 gateGui.ResetOnSpawn = false
+gateGui.Parent = CoreGui
 
 local frameKey = Instance.new("Frame", gateGui)
 frameKey.Size = UDim2.new(0, 380, 0, 190)
@@ -179,7 +132,6 @@ Instance.new("UIStroke", frameKey).Thickness = 2
 
 local titleKey = Instance.new("TextLabel", frameKey)
 titleKey.Size = UDim2.new(1,0,0,45)
-titleKey.Position = UDim2.new(0,0,0,0)
 titleKey.BackgroundTransparency = 1
 titleKey.Text = "Astro Hub"
 titleKey.Font = Enum.Font.GothamBlack
@@ -210,23 +162,94 @@ unlock.BackgroundColor3 = Color3.fromRGB(40,40,40)
 Instance.new("UICorner", unlock).CornerRadius = UDim.new(0,6)
 
 -- =============================
--- 🔓 CHECK KEY & RUN DESYNC
+-- RAINBOW BALL TRACKER VARIABLES
+-- =============================
+local rainbowBall
+local rainbowConn
+local snapCheckConn
+local desyncOn = false
+local firstUse = true
+
+local function removeRainbowBall()
+	if rainbowConn then 
+		rainbowConn:Disconnect() 
+		rainbowConn = nil 
+	end
+	if snapCheckConn then 
+		snapCheckConn:Disconnect() 
+		snapCheckConn = nil 
+	end
+	if rainbowBall then 
+		rainbowBall:Destroy() 
+		rainbowBall = nil 
+	end
+end
+
+local function createRainbowBall(initialCFrame)
+	removeRainbowBall()
+
+	rainbowBall = Instance.new("Part")
+	rainbowBall.Shape = Enum.PartType.Ball
+	rainbowBall.Size = Vector3.new(3, 3, 3)
+	rainbowBall.Anchored = true
+	rainbowBall.CanCollide = false
+	rainbowBall.Material = Enum.Material.Neon
+	rainbowBall.CFrame = initialCFrame
+	rainbowBall.Parent = Workspace
+
+	-- Rainbow color cycle
+	local hue = 0
+	rainbowConn = RunService.RenderStepped:Connect(function(dt)
+		if not rainbowBall then return end
+		hue = (hue + dt * 0.25) % 1
+		rainbowBall.Color = Color3.fromHSV(hue, 1, 1)
+	end)
+
+	-- Snap back to player if teleport/despawn detected
+	local char = player.Character
+	if not char then return end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	local lastCF = hrp.CFrame
+	local lastPos = hrp.Position
+
+	snapCheckConn = RunService.Heartbeat:Connect(function(dt)
+		if not rainbowBall or not hrp then return end
+
+		local curPos = hrp.Position
+		local distJump = (curPos - lastPos).Magnitude
+		local cfDiff = (hrp.CFrame.Position - lastCF.Position).Magnitude
+		local vel = distJump / math.max(dt, 1/60)
+
+		if distJump > 3 or vel > 100 or cfDiff > 2 then
+			rainbowBall.CFrame = hrp.CFrame
+		end
+
+		lastPos = curPos
+		lastCF = hrp.CFrame
+	end)
+end
+
+-- =============================
+-- UNLOCK & DESYNC GUI
 -- =============================
 unlock.MouseButton1Click:Connect(function()
-	if not validKey(box.Text) then lp:Kick("Invalid key.") return end
-	if not isWhitelisted(lp.UserId) then lp:Kick("You are not whitelisted.") return end
+	if not validKey(box.Text) then
+		player:Kick("Invalid key.")
+		return
+	end
+	if not isWhitelisted(player.UserId) then
+		player:Kick("You are not whitelisted.")
+		return
+	end
 
 	gateGui:Destroy()
 
-	-- =====================================================
-	-- 🔥 RTX DESYNC V2 GUI
-	-- =====================================================
-	if CoreGui:FindFirstChild("RtxDesyncV2") then
-		CoreGui.RtxDesyncV2:Destroy()
-	end
-
+	-- Create main GUI
 	local screenGui = Instance.new("ScreenGui")
 	screenGui.Name = "RtxDesyncV2"
+	screenGui.ResetOnSpawn = false
 	screenGui.Parent = CoreGui
 
 	local frame = Instance.new("Frame")
@@ -238,24 +261,20 @@ unlock.MouseButton1Click:Connect(function()
 	frame.Draggable = true
 	frame.Parent = screenGui
 
-	-- Gradient
 	local gradient = Instance.new("UIGradient", frame)
 	gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(25,25,35)), ColorSequenceKeypoint.new(1, Color3.fromRGB(40,40,50))})
 	gradient.Rotation = 45
 
-	-- Rounded corners
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0,16)
 	corner.Parent = frame
 
-	-- Shadow effect
 	local shadow = Instance.new("UIStroke")
 	shadow.Thickness = 2
 	shadow.Color = Color3.fromRGB(0,255,255)
 	shadow.Transparency = 0.7
 	shadow.Parent = frame
 
-	-- Title
 	local title = Instance.new("TextLabel")
 	title.Parent = frame
 	title.Size = UDim2.new(1,0,0,30)
@@ -267,7 +286,6 @@ unlock.MouseButton1Click:Connect(function()
 	title.TextSize = 20
 	title.TextXAlignment = Enum.TextXAlignment.Center
 
-	-- Desync Button
 	local btnDesync = Instance.new("TextButton")
 	btnDesync.Parent = frame
 	btnDesync.Size = UDim2.new(0.9,0,0,35)
@@ -288,49 +306,49 @@ unlock.MouseButton1Click:Connect(function()
 	btnCorner.Parent = btnDesync
 
 	-- =============================
-	-- FULL FFLAGS
+	-- FFLAGS
 	-- =============================
 	local flags = {
-	["GameNetPVHeaderRotationalVelocityZeroCutoffExponent"]="-5000",
-	["LargeReplicatorWrite5"]="true",
-	["LargeReplicatorEnabled9"]="true",
-	["AngularVelociryLimit"]="360",
-	["TimestepArbiterVelocityCriteriaThresholdTwoDt"]="2147483646",
-	["S2PhysicsSenderRate"]="15000",
-	["DisableDPIScale"]="true",
-	["MaxDataPacketPerSend"]="2147483647",
-	["ServerMaxBandwith"]="52",
-	["PhysicsSenderMaxBandwidthBps"]="20000",
-	["MaxTimestepMultiplierBuoyancy"]="2147483647",
-	["SimOwnedNOUCountThresholdMillionth"]="2147483647",
-	["MaxMissedWorldStepsRemembered"]="-2147483648",
-	["CheckPVDifferencesForInterpolationMinVelThresholdStudsPerSecHundredth"]="1",
-	["StreamJobNOUVolumeLengthCap"]="2147483647",
-	["DebugSendDistInSteps"]="-2147483648",
-	["MaxTimestepMultiplierAcceleration"]="2147483647",
-	["LargeReplicatorRead5"]="true",
-	["SimExplicitlyCappedTimestepMultiplier"]="2147483646",
-	["GameNetDontSendRedundantNumTimes"]="1",
-	["CheckPVLinearVelocityIntegrateVsDeltaPositionThresholdPercent"]="1",
-	["CheckPVCachedRotVelThresholdPercent"]="10",
-	["LargeReplicatorSerializeRead3"]="true",
-	["ReplicationFocusNouExtentsSizeCutoffForPauseStuds"]="2147483647",
-	["NextGenReplicatorEnabledWrite4"]="true",
-	["CheckPVDifferencesForInterpolationMinRotVelThresholdRadsPerSecHundredth"]="1",
-	["GameNetDontSendRedundantDeltaPositionMillionth"]="1",
-	["InterpolationFrameVelocityThresholdMillionth"]="5",
-	["StreamJobNOUVolumeCap"]="2147483647",
-	["InterpolationFrameRotVelocityThresholdMillionth"]="5",
-	["WorldStepMax"]="30",
-	["TimestepArbiterHumanoidLinearVelThreshold"]="1",
-	["InterpolationFramePositionThresholdMillionth"]="5",
-	["TimestepArbiterHumanoidTurningVelThreshold"]="1",
-	["MaxTimestepMultiplierContstraint"]="2147483647",
-	["GameNetPVHeaderLinearVelocityZeroCutoffExponent"]="-5000",
-	["CheckPVCachedVelThresholdPercent"]="10",
-	["TimestepArbiterOmegaThou"]="1073741823",
-	["MaxAcceptableUpdateDelay"]="1",
-	["LargeReplicatorSerializeWrite4"]="true",
+		["GameNetPVHeaderRotationalVelocityZeroCutoffExponent"] = "-5000",
+		["LargeReplicatorWrite5"] = "true",
+		["LargeReplicatorEnabled9"] = "true",
+		["AngularVelociryLimit"] = "360",
+		["TimestepArbiterVelocityCriteriaThresholdTwoDt"] = "2147483646",
+		["S2PhysicsSenderRate"] = "15000",
+		["DisableDPIScale"] = "true",
+		["MaxDataPacketPerSend"] = "2147483647",
+		["ServerMaxBandwith"] = "52",
+		["PhysicsSenderMaxBandwidthBps"] = "20000",
+		["MaxTimestepMultiplierBuoyancy"] = "2147483647",
+		["SimOwnedNOUCountThresholdMillionth"] = "2147483647",
+		["MaxMissedWorldStepsRemembered"] = "-2147483648",
+		["CheckPVDifferencesForInterpolationMinVelThresholdStudsPerSecHundredth"] = "1",
+		["StreamJobNOUVolumeLengthCap"] = "2147483647",
+		["DebugSendDistInSteps"] = "-2147483648",
+		["MaxTimestepMultiplierAcceleration"] = "2147483647",
+		["LargeReplicatorRead5"] = "true",
+		["SimExplicitlyCappedTimestepMultiplier"] = "2147483646",
+		["GameNetDontSendRedundantNumTimes"] = "1",
+		["CheckPVLinearVelocityIntegrateVsDeltaPositionThresholdPercent"] = "1",
+		["CheckPVCachedRotVelThresholdPercent"] = "10",
+		["LargeReplicatorSerializeRead3"] = "true",
+		["ReplicationFocusNouExtentsSizeCutoffForPauseStuds"] = "2147483647",
+		["NextGenReplicatorEnabledWrite4"] = "true",
+		["CheckPVDifferencesForInterpolationMinRotVelThresholdRadsPerSecHundredth"] = "1",
+		["GameNetDontSendRedundantDeltaPositionMillionth"] = "1",
+		["InterpolationFrameVelocityThresholdMillionth"] = "5",
+		["StreamJobNOUVolumeCap"] = "2147483647",
+		["InterpolationFrameRotVelocityThresholdMillionth"] = "5",
+		["WorldStepMax"] = "30",
+		["TimestepArbiterHumanoidLinearVelThreshold"] = "1",
+		["InterpolationFramePositionThresholdMillionth"] = "5",
+		["TimestepArbiterHumanoidTurningVelThreshold"] = "1",
+		["MaxTimestepMultiplierContstraint"] = "2147483647",
+		["GameNetPVHeaderLinearVelocityZeroCutoffExponent"] = "-5000",
+		["CheckPVCachedVelThresholdPercent"] = "10",
+		["TimestepArbiterOmegaThou"] = "1073741823",
+		["MaxAcceptableUpdateDelay"] = "1",
+		["LargeReplicatorSerializeWrite4"] = "true",
 	}
 
 	local defaultFlags = {}
@@ -338,48 +356,94 @@ unlock.MouseButton1Click:Connect(function()
 		pcall(function() defaultFlags[name] = fenv.getfflag(name) end)
 	end
 
-	local desyncOn = false
-	local firstUse = true
-
 	local function applyFlags(toggle)
 		if toggle then
 			for name,value in pairs(flags) do
-				pcall(function() fenv.setfflag(name,value) end)
+				pcall(function() fenv.setfflag(name, value) end)
 			end
 		else
 			for name,value in pairs(defaultFlags) do
-				pcall(function() fenv.setfflag(name,value) end)
+				pcall(function() fenv.setfflag(name, value) end)
 			end
 		end
 	end
 
+	-- =====================================================
+	-- DESYNC TOGGLE + RAINBOW BALL
+	-- =====================================================
 	btnDesync.MouseButton1Click:Connect(function()
 		if desyncOn then
 			desyncOn = false
 			btnDesync.Text = "Desync V2: OFF"
 			applyFlags(false)
 
-game.Players.LocalPlayer.Character.Animate.Disabled = false
+			if player.Character then
+				pcall(function()
+					player.Character.Animate.Disabled = false
+				end)
+			end
 
-			return
+			removeRainbowBall()
+		else
+			desyncOn = true
+			btnDesync.Text = "Desync V2: ON"
+			applyFlags(true)
+
+			if player.Character then
+				pcall(function()
+					player.Character.Animate.Disabled = true
+				end)
+
+				local root = player.Character:FindFirstChild("HumanoidRootPart")
+				if root then
+					createRainbowBall(root.CFrame)
+				end
+			end
+
+			if firstUse then
+				firstUse = false
+				task.spawn(function()
+					task.wait(0.3)
+					pcall(function() fenv.replicatesignal(player.Kill) end)
+				end)
+			end
 		end
+	end)
 
-		desyncOn = true
-		btnDesync.Text = "Desync V2: ON"
-		applyFlags(true)
+	-- =====================================================
+	-- RESPAWN HANDLING (including rainbow ball reset)
+	-- =====================================================
+	player.CharacterAdded:Connect(function(char)
+		task.wait(0.5)
+		local root = char:WaitForChild("HumanoidRootPart", 5)
 
-game.Players.LocalPlayer.Character.Animate.Disabled = true
-
-		if firstUse then
-			firstUse = false
-			task.spawn(function()
-				task.wait(0.3)
-				pcall(function() fenv.replicatesignal(lp.Kill) end)
+		if desyncOn and root then
+			createRainbowBall(root.CFrame)
+			pcall(function()
+				char.Animate.Disabled = true
 			end)
 		end
 	end)
 
-	lp.CharacterAdded:Connect(function(char)
-		-- normal toggle works after respawn
+	-- =====================================================
+	-- CLEANUP ON CHARACTER REMOVAL
+	-- =====================================================
+	player.CharacterRemoving:Connect(function()
+		removeRainbowBall()
 	end)
+
+	-- =====================================================
+	-- FULL RESET FUNCTION (can be called manually if needed)
+	-- =====================================================
+	local function fullReset()
+		desyncOn = false
+		btnDesync.Text = "Desync V2: OFF"
+		applyFlags(false)
+		removeRainbowBall()
+		if player.Character and player.Character:FindFirstChild("Animate") then
+			player.Character.Animate.Disabled = false
+		end
+	end
+
+	-- Optional: You can call fullReset() from a keybind or button if you add one
 end)
