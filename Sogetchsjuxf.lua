@@ -1,3 +1,27 @@
+-- LocalScript (place in StarterPlayerScripts)
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CenterTextGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+-- Create TextLabel
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(0, 200, 0, 50) -- width: 200, height: 50
+textLabel.Position = UDim2.new(0.5, -100, 0.5, -25) -- center of the screen
+textLabel.BackgroundTransparency = 1 -- no background
+textLabel.Text = "Astro Hub"
+textLabel.TextColor3 = Color3.fromRGB(0, 255, 255) -- cyan text
+textLabel.TextTransparency = 0.5 -- semi-transparent text
+textLabel.TextScaled = true
+textLabel.Font = Enum.Font.Gotham -- set font
+textLabel.Parent = screenGui
+
 -- =====================================================
 -- 🔐 ASTRO HUB + RTX DESYNC V2 (FULL FFLAGS, MODERN GUI)
 -- =====================================================
