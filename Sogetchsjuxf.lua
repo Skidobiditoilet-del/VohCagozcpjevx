@@ -55,6 +55,7 @@ end
 -- 🔑 ASTRO KEYS
 -- =============================
 local OBF_KEYS = {
+	enc("ASTRO-HUB?ON!!TOP"),
 	enc("ASTRO-H)-&93!?-$/@,9baPHAGAB!x"),
 	enc("ASTRO-Q!$7@^ZAp,9x&L"),
 	enc("ASTRO-X@!9$^7Z,ApQx"),
